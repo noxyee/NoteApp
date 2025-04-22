@@ -1,0 +1,9 @@
+<div class="bg-slate-100 px-4 py-4 shadow-md flex justify-between items-center">
+  <p class="select-none font-bold" [routerLink]="['/']">{{ title() }}</p>
+  <div class="flex gap-2">
+    <app-primary-button class="bg-blue-500 text-white rounded-xl px-5 py-2 hover:opacity-90 shadow-md" label="Tags"
+                        (btnClicked)="handleButtonClicked()"/>
+    <app-primary-button class="bg-blue-500 text-white rounded-xl px-5 py-2 hover:opacity-90 shadow-md" label="Notes"
+                        (btnClicked)="handleButtonClicked()"/>
+  </div>
+</div>

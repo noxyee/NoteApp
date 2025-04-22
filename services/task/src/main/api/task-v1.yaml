@@ -1,0 +1,201 @@
+openapi: 3.1.0
+info:
+  title: Task Service API
+  description: API documentation for Task Service
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8092'
+paths:
+  /api/v1/tasks/{noteId}:
+    get:
+      summary: Get tasks by note ID
+      tags:
+        - Task Controller
+      parameters:
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskResponse'
+  /api/v1/tasks:
+    post:
+      summary: Create a new task
+      tags:
+        - Task Controller
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+  /api/v1/tasks/{taskId}:
+    put:
+      summary: Update an existing task
+      tags:
+        - Task Controller
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '404':
+          description: The task was not found
+    delete:
+      summary: Delete a task
+      tags:
+        - Task Controller
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+        '404':
+          description: The task was not found
+  /api/v1/notes/{taskId}/tags/{tagId}:
+    put:
+      tags:
+        - TagController
+      summary: Add tag to a task
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: tagId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '404':
+          description: The note was not found
+    delete:
+      tags:
+        - TagController
+      summary: Delete tag from a task
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: tagId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '404':
+          description: The task was not found
+components:
+  schemas:
+    TaskResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        userId:
+          type: string
+        noteId:
+          type: string
+        tagIds:
+          type: array
+          items:
+            type: string
+        dueDate:
+          type: string
+          format: date-time
+        done:
+          type: boolean
+        sendMailAfterDueDate:
+          type: boolean
+    CreateTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        userId:
+          type: string
+        noteId:
+          type: string
+        dueDate:
+          type: string
+          format: date-time
+        sendMailAfterDueDate:
+          type: boolean
+        tagIds:
+          type: array
+          items:
+            type: string
+      required:
+        - title
+        - content
+        - userId
+        - noteId
+    UpdateTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        dueDate:
+          type: string
+          format: date-time
+        done:
+          type: boolean
+        sendMailAfterDueDate:
+          type: booleanó

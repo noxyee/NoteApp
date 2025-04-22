@@ -1,0 +1,37 @@
+<div class="relative py-2 px-4 flex flex-col gap-1 bg-white p-6 shadow-xl ring-1 ring-slate-900/5 rounded-lg ">
+  <div class="absolute top-0 right-0 py-2 px-4 rounded-bl-xl rounded-tr-lg hover:bg-slate-50"
+       (click)="navigateToTask(task())">
+    <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 3">
+      <path
+        d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z"/>
+    </svg>
+  </div>
+  <h1 class="select-none font-semibold tracking-tight">{{ task().title }}</h1>
+  <p class="select-none text-sm break-all text-slate-500">{{ task().content }}</p>
+  @if (task().dueDate) {
+    <p class="select-none">Due date: {{ task().dueDate?.toLocaleString() }}</p>
+  }
+  <div class="col-span-7 flex flex-row justify-between mt-auto">
+    <div class="col-span-7 flex flex-wrap gap-1">
+      @for (tag of tags(); track tag.id) {
+        <app-tag [tag]="tag"/>
+      }
+    </div>
+    <div class="flex flex-wrap justify-end gap-1">
+      @if (task().sendMailAfterDueDate) {
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+             class="size-6">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/>
+        </svg>
+      }
+      @if (task().done) {
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+             class="size-6">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+        </svg>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,228 @@
+openapi: 3.1.0
+info:
+  title: Note API
+  description: API for managing notes
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8091'
+
+paths:
+  /api/v1/notes/{userId}:
+    get:
+      tags:
+        - NoteController
+      summary: Get user notes
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NoteResponse'
+  /api/v1/notes:
+    post:
+      tags:
+        - NoteController
+      summary: Create a new note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNoteRequest'
+      responses:
+        '200':
+          description: The created note
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteResponse'
+  /api/v1/notes/{noteId}:
+    delete:
+      tags:
+        - NoteController
+      summary: Delete a note
+      parameters:
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        404:
+          description: The note was not found
+        '200':
+          description: Note deleted successfully
+    put:
+      tags:
+        - NoteController
+      summary: Update an existing note
+      parameters:
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateNoteRequest'
+      responses:
+        404:
+          description: The note was not found
+        '200':
+          description: The updated note
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteResponse'
+  /api/v1/notes/{noteId}/tags/{tagId}:
+    put:
+      tags:
+        - TagController
+      summary: Add tag to a note
+      parameters:
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: tagId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Note
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteResponse'
+        '404':
+          description: The note was not found
+    delete:
+      tags:
+        - TagController
+      summary: Delete tag from a note
+      parameters:
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: tagId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Note
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteResponse'
+        '404':
+          description: The note was not found
+  /api/v1/notes/{noteId}/tasks/{taskId}:
+    put:
+      tags:
+        - TaskController
+      summary: Add task to a note
+      parameters:
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Note
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteResponse'
+        '404':
+          description: The note was not found
+    delete:
+      tags:
+        - TaskController
+      summary: Delete task from a note
+      parameters:
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Note
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteResponse'
+        '404':
+          description: The note was not found
+components:
+  schemas:
+    CreateNoteRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+      required:
+        - userId
+    UpdateNoteRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 100
+        content:
+          type: string
+    NoteResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        userId:
+          type: string
+        tagIds:
+          type: array
+          items:
+            type: string
+        taskIds:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+            type: string
+            format: date-time

@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - include:
+      file: classpath:db/db.changelog-master.yaml
+  - include:
+      file: classpath:db/changelog/add-tag-test-data.sql

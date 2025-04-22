@@ -1,0 +1,8 @@
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 p-3">
+  @for (note of notes(); track note.id) {
+    <app-note-card [note]="note"/>
+  }
+</div>
+<div class="absolute bottom-0 right-0 p-5 flex">
+  <app-primary-button class="bg-blue-700 hover:opacity-90 text-amber-50 rounded-full shadow-2xl px-4 py-2 h-full w-full items-center text-lg" label="Add note" (btnClicked)="addNewNote()"/>
+</div>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/services/config-server/src/main/kotlin" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/discovery-server/src/main/kotlin" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/gateway/src/main/kotlin" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/note/src/main/kotlin" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/notification/src/main/kotlin" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/observability-boot-blog-post-main/server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/tag/src/main/kotlin" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/task/src/main/kotlin" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/user/src/main/kotlin" charset="UTF-8" />
+  </component>
+</project>

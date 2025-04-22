@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: gateway
+  config:
+    import: optional:configserver:http://localhost:8888
+  profiles:
+    active: dev
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: tag
+          uri: lb://TAG
+          predicates:
+            - Path=/api/v1/tags/**
+        - id: note
+          uri: lb://NOTE
+          predicates:
+            - Path=/api/v1/notes/**
+        - id: task
+          uri: lb://TASK
+          predicates:
+            - Path=/api/v1/tasks/**

@@ -1,0 +1,119 @@
+openapi: 3.1.0
+info:
+  title: Tag Service API
+  description: API for managing tags
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8093'
+paths:
+  /api/v1/tags/{userId}:
+    get:
+      summary: Get tags for a user
+      description: Retrieves a list of tags for a specific user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The ID of the user
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TagResponse'
+  /api/v1/tags/{tagId}:
+    delete:
+      summary: Delete a tag
+      description: Deletes a tag by its ID
+      parameters:
+        - name: tagId
+          in: path
+          required: true
+          description: The ID of the tag to delete
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tag deleted successfully
+        '404':
+          description: Tag not found
+    put:
+      summary: Update an existing tag
+      description: Updates an existing tag
+      parameters:
+        - name: tagId
+          in: path
+          required: true
+          description: The ID of the tag to delete
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTagRequest'
+      responses:
+        '200':
+          description: Tag updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagResponse'
+        '404':
+          description: Tag not found
+  /api/v1/tags:
+    post:
+      summary: Create a new tag
+      description: Creates a new tag
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTagRequest'
+      responses:
+        '200':
+          description: Tag created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagResponse'
+components:
+  schemas:
+    CreateTagRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+        name:
+          type: string
+        color:
+          type: string
+      required:
+        - userId
+        - color
+        - name
+    UpdateTagRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        color:
+          type: string
+    TagResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        color:
+          type: string
+        userId:
+          type: string

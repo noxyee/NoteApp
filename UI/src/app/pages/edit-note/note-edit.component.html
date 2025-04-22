@@ -1,0 +1,27 @@
+<div class="flex flex-row gap-2 pl-9 py-4 pr-2 h-full">
+  <div class="flex-5/6 flex flex-col gap-2">
+    <label class="select-none block text-sm font-bold pl-1">Title:</label>
+    <input class="block resize-none p-2 w-full bg-gray-50 rounded-lg border border-gray-300 focus:outline-0"
+           [value]="note()?.title"/>
+    <label for="content" class="select-none block text-sm font-bold pl-1">Content:</label>
+    <textarea id="content"
+              class="block h-full resize-none p-2.5 w-full text-sm  bg-gray-50 rounded-lg border border-gray-300 focus:outline-0"
+              [value]="note()?.content"></textarea>
+    <div class="flex items-center gap-1 min-h-5 mt-2">
+      @for (tag of tags(); track tag.id) {
+        <app-tag [tag]="tag" [enableRemoveButton]=true (btnClicked)="removeTagClicked($event)"/>
+      }
+      <div class="rounded-4xl hover:bg-gray-100">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+             class="size-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="flex-1/6 flex flex-col p-2 gap-2">
+    @for (task of tasks(); track task.id) {
+      <app-task [task]="task"/>
+    }
+  </div>
+</div>
