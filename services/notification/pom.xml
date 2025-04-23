@@ -71,6 +71,16 @@
 		</dependency>
 		<!--OTHER-->
 		<dependency>
+			<groupId>io.mongock</groupId>
+			<artifactId>mongock-springboot</artifactId>
+			<version>5.4.4</version>
+		</dependency>
+		<dependency>
+			<groupId>io.mongock</groupId>
+			<artifactId>mongodb-springdata-v4-driver</artifactId>
+			<version>5.4.4</version>
+		</dependency>
+		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
