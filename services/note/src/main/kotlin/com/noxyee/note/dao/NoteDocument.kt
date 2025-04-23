@@ -19,7 +19,7 @@ data class NoteDocument(
     val userId: String,
     var tagIds: Set<String> = emptySet(),
     var taskIds: Set<String> = emptySet(),
-    var imageIds: List<String> = emptyList(),
+    var imageIds: List<String> = mutableListOf(),
     @CreatedDate
     val createdAt: LocalDateTime = LocalDateTime.now(),
     @LastModifiedDate
