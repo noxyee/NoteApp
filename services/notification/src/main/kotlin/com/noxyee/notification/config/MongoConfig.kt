@@ -1,10 +1,9 @@
-package com.noxyee.note.config
+package com.noxyee.notification.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.MongoDatabaseFactory
 import org.springframework.data.mongodb.MongoTransactionManager
-
 
 @Configuration
 class MongoConfig {
@@ -13,5 +12,4 @@ class MongoConfig {
     fun mongoTransactionManager(mongoDbFactory: MongoDatabaseFactory): MongoTransactionManager {
         return MongoTransactionManager(mongoDbFactory)
     }
-
 }
