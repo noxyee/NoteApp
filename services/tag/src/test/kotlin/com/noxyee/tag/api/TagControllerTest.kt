@@ -2,8 +2,10 @@ package com.noxyee.tag.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.noxyee.tag.BaseIntegration
+import com.noxyee.tag.dao.TagRepository
 import com.noxyee.tag.model.CreateTagRequest
 import com.noxyee.tag.model.UpdateTagRequest
+import org.junit.jupiter.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -24,6 +26,11 @@ class TagControllerTest : BaseIntegration() {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
+    @Autowired
+    private lateinit var tagRepository: TagRepository
+
+    private val objectMapper = ObjectMapper()
+
     @Test
     fun `getTags should return three tags for user with tags`() {
         // Given
@@ -38,7 +45,7 @@ class TagControllerTest : BaseIntegration() {
     @Test
     fun `getTags should return zero tags for user without tags`() {
         // Given
-        val userId = "invalid-user-id"
+        val userId = "00000000-0000-0000-0000-000000000000"
 
         // When - then
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/tags/$userId"))
@@ -56,15 +63,19 @@ class TagControllerTest : BaseIntegration() {
         )
 
         // When - then
-        mockMvc.perform(
+        val response = mockMvc.perform(
             MockMvcRequestBuilders.post("/api/v1/tags")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(ObjectMapper().writeValueAsString(createTagRequest))
+                .content(objectMapper.writeValueAsString(createTagRequest))
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.name").value("New Tag"))
             .andExpect(jsonPath("$.color").value("#FF5733"))
             .andExpect(jsonPath("$.userId").value("09eff104-d734-4729-8d26-b4782b4e2f61"))
+            .andReturn()
+
+        val id = objectMapper.readTree(response.response.contentAsString).get("id").asText()
+        Assertions.assertNotNull(tagRepository.findById(id).get())
     }
 
     @Test
@@ -80,7 +91,7 @@ class TagControllerTest : BaseIntegration() {
         mockMvc.perform(
             MockMvcRequestBuilders.post("/api/v1/tags")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(ObjectMapper().writeValueAsString(createTagRequest))
+                .content(objectMapper.writeValueAsString(createTagRequest))
         )
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.size()").value(1))
@@ -97,13 +108,21 @@ class TagControllerTest : BaseIntegration() {
         )
 
         //When - then
-        mockMvc.perform(
-            MockMvcRequestBuilders.put("/api/v1/tags/{tagId}", tagId)
+        val response = mockMvc.perform(
+            MockMvcRequestBuilders.put("/api/v1/tags/$tagId")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(ObjectMapper().writeValueAsString(updateTagRequest))
+                .content(objectMapper.writeValueAsString(updateTagRequest))
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.name").value(newTagName))
+            .andReturn()
+
+        val id = objectMapper.readTree(response.response.contentAsString).get("id").asText()
+        val tag = tagRepository.findById(id).get()
+
+        Assertions.assertNotNull(tag)
+        Assertions.assertEquals(newTagName, tag.name)
+        Assertions.assertEquals("#FFFFFF", tag.color)
     }
 
     @Test
@@ -119,7 +138,7 @@ class TagControllerTest : BaseIntegration() {
         mockMvc.perform(
             MockMvcRequestBuilders.put("/api/v1/tags/{tagId}", tagId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(ObjectMapper().writeValueAsString(updateTagRequest))
+                .content(objectMapper.writeValueAsString(updateTagRequest))
         )
             .andExpect(status().isNotFound)
             .andExpect(content().string("Tag with id: invalid-tag-id not found"))
