@@ -8,8 +8,8 @@ import com.noxyee.note.model.CreateNoteRequest
 import com.noxyee.note.model.NoteResponse
 import com.noxyee.note.model.UpdateNoteRequest
 import com.noxyee.note.util.NoteMapper
-import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class NoteService(
@@ -42,6 +42,7 @@ class NoteService(
         return noteMapper.mapNoteDocumentToNoteResponse(savedNoteDocument)
     }
 
+    @Transactional
     fun deleteNote(noteId: String) {
         if (!noteRepository.existsById(noteId)) {
             throw NoteNotFoundException("Note with id: $noteId not found")

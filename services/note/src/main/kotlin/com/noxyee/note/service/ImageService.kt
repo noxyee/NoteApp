@@ -16,6 +16,7 @@ import org.springframework.data.mongodb.gridfs.GridFsResource
 import org.springframework.data.mongodb.gridfs.GridFsTemplate
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
 
@@ -23,11 +24,12 @@ import java.io.IOException
 class ImageService(
     private val gridFsTemplate: GridFsTemplate,
     private val noteRepository: NoteRepository,
-    private val noteService: NoteService,
     private val noteMapper: NoteMapper
 ) {
+
+    @Transactional
     fun addImageToNote(noteId: String, file: MultipartFile): NoteResponse {
-        val note = noteService.getNoteById(noteId)
+        val note = findNoteById(noteId)
         val metadata = BasicDBObject()
         metadata["noteId"] = noteId
         metadata["_contentType"] = noteId
@@ -57,8 +59,9 @@ class ImageService(
         return gridFsTemplate.getResource(gridFsFile)
     }
 
+    @Transactional
     fun deleteImage(noteId: String, imageId: String): NoteResponse {
-        val note = noteService.getNoteById(noteId)
+        val note = findNoteById(noteId)
 
         if (!note.imageIds.contains(imageId)) {
             throw RuntimeException("Image with id: $imageId not found in note with id: $noteId")
@@ -83,5 +86,10 @@ class ImageService(
         } catch (e: IllegalArgumentException) {
             throw IllegalArgumentException("Invalid image ID format")
         }
+    }
+
+    private fun findNoteById(noteId: String): NoteDocument {
+        return noteRepository.findById(noteId)
+            .orElseThrow { NoteNotFoundException("Note with id: $noteId not found") }
     }
 }
