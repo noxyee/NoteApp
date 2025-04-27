@@ -46,7 +46,8 @@ class NoteControllerTest : BaseIntegration() {
         // When - then
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/notes/$userId"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.length()").value(5))
+            .andExpect(jsonPath("$.content.length()").value(5))
+            .andExpect(jsonPath("$.totalElements").value(5))
     }
 
     @Test
@@ -57,7 +58,10 @@ class NoteControllerTest : BaseIntegration() {
         // When - then
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/notes/$userId"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.length()").value(0))
+            .andExpect(jsonPath("$.content.length()").value(0))
+            .andExpect(jsonPath("$.totalElements").value(0))
+            .andExpect(jsonPath("$.totalPages").value(0))
+            .andExpect(jsonPath("$.number").value(0))
     }
 
     @Test
