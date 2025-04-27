@@ -39,7 +39,9 @@ class TagControllerTest : BaseIntegration() {
         // When - then
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/tags/$userId"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.length()").value(3))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.content.length()").value(3))
+            .andExpect(jsonPath("$.totalElements").value(3))
     }
 
     @Test
@@ -50,7 +52,9 @@ class TagControllerTest : BaseIntegration() {
         // When - then
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/tags/$userId"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.length()").value(0))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.content.length()").value(0))
+            .andExpect(jsonPath("$.totalElements").value(0))
     }
 
     @Test

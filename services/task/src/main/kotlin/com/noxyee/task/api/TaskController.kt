@@ -4,13 +4,21 @@ import com.noxyee.task.model.CreateTaskRequest
 import com.noxyee.task.model.TaskResponse
 import com.noxyee.task.model.UpdateTaskRequest
 import com.noxyee.task.service.TaskService
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.data.web.PageableDefault
 import org.springframework.web.bind.annotation.*
 
 @RestController
 class TaskController(private val taskService: TaskService) {
 
     @GetMapping("/api/v1/tasks/{noteId}")
-    fun getTasks(@PathVariable noteId: String): List<TaskResponse> = taskService.getTasksByNoteId(noteId)
+    fun getTasks(
+        @PathVariable noteId: String, @PageableDefault(
+            size = 20, page = 0, sort = ["createdAt"], direction = Sort.Direction.DESC
+        ) pageable: Pageable
+    ): Page<TaskResponse> = taskService.getTasksByNoteId(noteId, pageable)
 
     @PostMapping("/api/v1/tasks")
     fun createTask(@RequestBody createTaskRequest: CreateTaskRequest): TaskResponse =

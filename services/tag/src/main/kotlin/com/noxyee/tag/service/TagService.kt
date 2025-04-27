@@ -8,6 +8,8 @@ import com.noxyee.tag.model.TagResponse
 import com.noxyee.tag.model.UpdateTagRequest
 import com.noxyee.tag.util.TagMapper
 import jakarta.transaction.Transactional
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
 @Service
@@ -17,8 +19,8 @@ class TagService(
     private val kafkaProducer: KafkaProducer
 ) {
 
-    fun getTags(userId: String): List<TagResponse> {
-        return tagRepository.findAllByUserId(userId).map(tagMapper::mapEntityToTagResponse)
+    fun getTags(userId: String, pageable: Pageable): Page<TagResponse> {
+        return tagRepository.findAllByUserId(userId, pageable).map(tagMapper::mapEntityToTagResponse)
     }
 
     fun createTag(createTagRequest: CreateTagRequest): TagResponse {

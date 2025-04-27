@@ -8,19 +8,25 @@ import com.noxyee.task.model.CreateTaskRequest
 import com.noxyee.task.model.TaskResponse
 import com.noxyee.task.model.UpdateTaskRequest
 import com.noxyee.task.util.TaskMapper
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class TaskService(private val taskRepository: TaskRepository, private val taskMapper: TaskMapper, private val noteClient: NoteClient) {
+class TaskService(
+    private val taskRepository: TaskRepository,
+    private val taskMapper: TaskMapper,
+    private val noteClient: NoteClient
+) {
 
     fun getTaskById(taskId: String): TaskDocument {
         return taskRepository.findById(taskId)
             .orElseThrow { TaskNotFoundException("Task with id: $taskId not found") }
     }
 
-    fun getTasksByNoteId(noteId: String): List<TaskResponse> {
-        return taskRepository.findAllByNoteId(noteId)
+    fun getTasksByNoteId(noteId: String, pageable: Pageable): Page<TaskResponse> {
+        return taskRepository.findAllByNoteId(noteId, pageable)
             .map(taskMapper::mapTaskDocumentToTaskResponse)
     }
 

@@ -5,14 +5,22 @@ import com.noxyee.note.model.NoteResponse
 import com.noxyee.note.model.UpdateNoteRequest
 import com.noxyee.note.service.NoteService
 import jakarta.validation.Valid
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.data.web.PageableDefault
 import org.springframework.web.bind.annotation.*
 
 @RestController
 class NoteController(private val noteService: NoteService) {
 
     @GetMapping("/api/v1/notes/{userId}")
-    fun getUserNotes(@PathVariable("userId") userId: String): List<NoteResponse> {
-        return noteService.getUserNotes(userId)
+    fun getUserNotes(
+        @PathVariable("userId") userId: String, @PageableDefault(
+            size = 20, page = 0, sort = ["createdAt"], direction = Sort.Direction.DESC
+        ) pageable: Pageable
+    ): Page<NoteResponse> {
+        return noteService.getUserNotes(userId, pageable)
     }
 
     @PostMapping("/api/v1/notes")

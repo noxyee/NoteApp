@@ -8,6 +8,8 @@ import com.noxyee.note.model.CreateNoteRequest
 import com.noxyee.note.model.NoteResponse
 import com.noxyee.note.model.UpdateNoteRequest
 import com.noxyee.note.util.NoteMapper
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -24,8 +26,8 @@ class NoteService(
             .orElseThrow { NoteNotFoundException("Note with id: $noteId not found") }
     }
 
-    fun getUserNotes(userId: String): List<NoteResponse> {
-        return noteRepository.findAllByUserId(userId)
+    fun getUserNotes(userId: String, pageable: Pageable): Page<NoteResponse> {
+        return noteRepository.findAllByUserId(userId, pageable)
             .map(noteMapper::mapNoteDocumentToNoteResponse)
     }
 
