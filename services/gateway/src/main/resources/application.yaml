@@ -23,3 +23,7 @@ spring:
           uri: lb://TASK
           predicates:
             - Path=/api/v1/tasks/**
+      metrics:
+        enabled: true
+  reactor:
+    context-propagation: auto

@@ -55,6 +55,11 @@
 			<groupId>io.opentelemetry</groupId>
 			<artifactId>opentelemetry-exporter-zipkin</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.github.loki4j</groupId>
+			<artifactId>loki-logback-appender</artifactId>
+			<version>1.5.1</version>
+		</dependency>
 		<!--KOTLIN-->
 		<dependency>
 			<groupId>org.jetbrains.kotlin</groupId>
