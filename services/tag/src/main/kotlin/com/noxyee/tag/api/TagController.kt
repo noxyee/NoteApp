@@ -6,6 +6,7 @@ import com.noxyee.tag.model.TagResponse
 import com.noxyee.tag.model.UpdateTagRequest
 import com.noxyee.tag.service.TagService
 import jakarta.validation.Valid
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
@@ -14,12 +15,15 @@ import org.springframework.web.bind.annotation.*
 @RestController
 class TagController(private val tagService: TagService) {
 
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     @GetMapping("/api/v1/tags/{userId}")
     fun getTags(
         @PathVariable("userId") userId: String, @PageableDefault(
             size = 20, page = 0, sort = ["createdAt"], direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): PageDTO<TagResponse> {
+        logger.info("Get tags for user: $userId")
         return tagService.getTags(userId, pageable)
     }
 
