@@ -13,7 +13,7 @@ import org.springframework.kafka.support.serializer.JsonSerializer
 @Configuration
 class KafkaProducerConfig {
 
-    @Value("\${spring.kafka.producer.bootstrap-servers}")
+    @Value("\${spring.kafka.bootstrap-servers}")
     private lateinit var bootstrapServers: String
 
     @Bean
