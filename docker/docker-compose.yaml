@@ -1,4 +1,5 @@
 services:
+  #DATABASE
   postgres:
     container_name: postgres
     image: postgres
@@ -10,6 +11,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d
     networks:
       - microservices
   mongo:
@@ -22,12 +24,18 @@ services:
       - "27017:27017"
     volumes:
       - mongo:/data/db
+    networks:
+      - microservices
+  #MAIL
   mail-dev:
     container_name: mail-dev
     image: maildev/maildev
     ports:
       - "1080:1080"
       - "1025:1025"
+    networks:
+      - microservices
+  #KAFKA
   zookeeper:
     container_name: zookeeper
     image: confluentinc/cp-zookeeper
@@ -50,10 +58,10 @@ services:
     ports:
       - "9092:9092"
       - "29092:29092"
-    networks:
-      - microservices
     depends_on:
       - zookeeper
+    networks:
+      - microservices
   akhq:
     container_name: akhq
     image: tchiotludo/akhq
@@ -65,32 +73,33 @@ services:
              properties:
                bootstrap.servers: "kafka:29092"
     ports:
-      - "8080:8080"
+      - "8090:8080"
     networks:
       - microservices
     depends_on:
       - kafka
+  #SECURITY
   keycloak:
     container_name: keycloak
     image: quay.io/keycloak/keycloak:latest
     environment:
-      KEYCLOAK_IMPORT: /opt/jboss/keycloak/imports/realm-export.json
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       DB_VENDOR: POSTGRES
       DB_ADDR: postgres
       DB_DATABASE: postgres
       DB_USER: postgres
       DB_PASSWORD: postgres
     ports:
-      - "8090:8080"
+      - "8080:8080"
+    command:
+      - start-dev
+      - --import-realm
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
     networks:
       - microservices
-    command:
-      - "start-dev"
-    volumes:
-      - ./keycloak/realm-export.json:/opt/jboss/keycloak/imports/realm-export.json
-
+  #METRICS
   prometheus:
     image: prom/prometheus:v2.51.2
     container_name: prometheus
@@ -99,7 +108,8 @@ services:
     volumes:
       - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
     command: "--config.file=/etc/prometheus/prometheus.yaml"
-
+    networks:
+      - microservices
   promtail:
     image: grafana/promtail:3.0.0
     container_name: promtail
@@ -108,6 +118,8 @@ services:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock
     command: "--config.file=/etc/promtail/docker-config.yml"
+    networks:
+      - microservices
   loki:
     image: grafana/loki:3.0.0
     container_name: loki
@@ -116,6 +128,8 @@ services:
       - "3100:3100"
     depends_on:
       - promtail
+    networks:
+      - microservices
   tempo:
     image: grafana/tempo:2.4.1
     container_name: tempo
@@ -125,6 +139,8 @@ services:
       - "9411:9411"
     volumes:
       - ./tempo/tempo.yml:/etc/tempo-config.yml
+    networks:
+      - microservices
   grafana:
     image: grafana/grafana:10.4.2
     container_name: grafana
@@ -137,17 +153,184 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - microservices
+  #CACHE
   redis:
     container_name: redis
     image: redis:latest
     ports:
       - "6379:6379"
     command: redis-server
-    restart: unless-stopped
+    networks:
+      - microservices
+
+  #MICROSERVICES
+  config-server:
+    container_name: config-server
+    build:
+      context: ../services/config-server
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    environment:
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://tempo:9411
+      - LOKI_URL=http://loki:3100/loki/api/v1/push
+      - SPRING_PROFILES_ACTIVE=native,docker
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8888/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      - loki
+      - tempo
+    networks:
+      - microservices
+  discovery-server:
+    container_name: discovery-server
+    build:
+      context: ../services/discovery-server
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      config-server:
+        condition: service_started
+    networks:
+      - microservices
+  gateway:
+    container_name: gateway
+    build:
+      context: ../services/gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8222:8222"
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8222/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      config-server:
+        condition: service_started
+      discovery-server:
+        condition: service_started
+    networks:
+      - microservices
+  note:
+    container_name: note
+    build:
+      context: ../services/note
+      dockerfile: Dockerfile
+    ports:
+      - "8091:8091"
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8091/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      config-server:
+        condition: service_started
+      discovery-server:
+        condition: service_started
+      mongo:
+        condition: service_started
+    networks:
+      - microservices
+  tag:
+    container_name: tag
+    build:
+      context: ../services/tag
+      dockerfile: Dockerfile
+    ports:
+      - "8093:8093"
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8093/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      config-server:
+        condition: service_started
+      discovery-server:
+        condition: service_started
+      postgres:
+        condition: service_started
+    networks:
+      - microservices
+  task:
+    container_name: task
+    build:
+      context: ../services/task
+      dockerfile: Dockerfile
+    ports:
+      - "8092:8092"
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8092/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      config-server:
+        condition: service_started
+      discovery-server:
+        condition: service_started
+      mongo:
+        condition: service_started
+    networks:
+      - microservices
+  notification:
+    container_name: notification
+    build:
+      context: ../services/notification
+      dockerfile: Dockerfile
+    ports:
+      - "8094:8094"
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8094/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      mail-dev:
+        condition: service_started
+      config-server:
+        condition: service_started
+      discovery-server:
+        condition: service_started
+      mongo:
+        condition: service_started
+    networks:
+      - microservices
 networks:
   microservices:
     driver: bridge
 volumes:
   postgres:
   mongo:
-  grafana_data: { }
+  grafana_data:
